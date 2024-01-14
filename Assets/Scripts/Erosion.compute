@@ -1,0 +1,127 @@
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> heightmap;
+StructuredBuffer<int> dropletPositions;
+StructuredBuffer<int> erosionBrushIndices;
+StructuredBuffer<float> erosionBrushWeights;
+
+int resolution;
+int erosionBrushIndicesCount;
+int dropletsMaxLifetime;
+int erosionRadius;
+
+float gravity;
+float evaporationSpeed;
+float inertia;                  // Higher values make channel turns smoother.
+float sedimentCapacityFactor;   // Multiplier For How Much Sediment A Droplet Can Carry
+float minimumSedimentCapacity;  // Used To Prevent Carry Capacity Getting Too Close To Zero On Flatter Terrain
+float erosionSpeed;             // Erosion speed (how fast the soil is removed).
+float depositionSpeed;          // Deposition speed (how fast the extra sediment is dropped).
+
+float3 CalculateHeightAndGradient(float posX, float posY)
+{
+    int coordX = (int) posX;
+    int coordY = (int) posY;
+
+    float x = posX - coordX;
+    float y = posY - coordY;
+
+    int nodeIndexNW = coordY * resolution + coordX;
+    float heightNW = heightmap[nodeIndexNW];
+    float heightNE = heightmap[nodeIndexNW + 1];
+    float heightSW = heightmap[nodeIndexNW + resolution];
+    float heightSE = heightmap[nodeIndexNW + resolution + 1];
+
+    float gradientX = (heightNE - heightNW) * (1 - y) + (heightSE - heightSW) * y;
+    float gradientY = (heightSW - heightNW) * (1 - x) + (heightSE - heightNE) * x;
+
+    float height = heightNW * (1 - x) * (1 - y) + heightNE * x * (1 - y) + heightSW * (1 - x) * y + heightSE * x * y;
+
+    return float3(gradientX, gradientY, height);
+}
+
+[numthreads(1024, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    int index = dropletPositions[id.x];
+    float dropletPositionX = float(index) % resolution;
+    float dropletPositionY = float(index) / resolution;
+    float dropletDirectionX = 0;
+    float dropletDirectionY = 0;
+    float dropletSpeed = 1;
+    float dropletVolume = 1;
+    float dropletSediment = 0;
+
+    for (int lifetime = 0; lifetime < dropletsMaxLifetime; lifetime++)
+    {
+        int nodeX = (int) dropletPositionX;
+        int nodeY = (int) dropletPositionY;
+        int dropletIndex = nodeY * resolution + nodeX;
+
+        // Calculate Droplet's Offset Inside The Cell (0,0) = At NW Node, (1,1) = At SE Node
+        float cellOffsetX = dropletPositionX - nodeX;
+        float cellOffsetY = dropletPositionY - nodeY;
+
+        // Calculate Droplet's Height And Direction Of Flow With Bilinear Interpolation Of Surrounding Heights
+        float3 heightAndGradient = CalculateHeightAndGradient(dropletPositionX, dropletPositionY);
+
+        // Calculate Droplet's Next Position
+        dropletDirectionX = (dropletDirectionX * inertia - heightAndGradient.x * (1 - inertia));
+        dropletDirectionY = (dropletDirectionY * inertia - heightAndGradient.y * (1 - inertia));
+
+        // Normalize direction
+        float directionLength = max(0.01, sqrt(dropletDirectionX * dropletDirectionX + dropletDirectionY * dropletDirectionY));
+        dropletDirectionX /= directionLength;
+        dropletDirectionY /= directionLength;
+        
+        // Update Droplet's Next Position
+        dropletPositionX += dropletDirectionX;
+        dropletPositionY += dropletDirectionY;
+
+        // Stop Simulating Droplet If It's Not Moving Or Has Flowed Over Edge Of heightmap
+        if ((dropletDirectionX == 0 && dropletDirectionY == 0) || dropletPositionX < erosionRadius || dropletPositionX > resolution - erosionRadius || dropletPositionY < erosionRadius || dropletPositionY > resolution - erosionRadius) break;
+
+        // Find The Droplet's New Height And Calculate The DeltaHeight
+        float newHeight = CalculateHeightAndGradient(dropletPositionX, dropletPositionY).z;
+        float deltaHeight = newHeight - heightAndGradient.z;
+
+        // Calculate The Droplet's Sediment Capacity (Higher When Moving Fast Down A Slope And Contains Lots Of Water)
+        float sedimentCapacity = max(-deltaHeight * dropletSpeed * dropletVolume * sedimentCapacityFactor, minimumSedimentCapacity);
+
+        // If Carrying More Sediment Than Capacity, Or Flowing Uphill (deltaHeight > 0)
+        if (dropletSediment > sedimentCapacity || deltaHeight > 0)
+        {
+            //Try To Fill Up To The Current Height, Otherwise Deposit A Fraction Of The Excess Sediment
+            float amountToDeposit = (deltaHeight > 0) ? min(deltaHeight, dropletSediment) : (dropletSediment - sedimentCapacity) * depositionSpeed;
+            dropletSediment -= amountToDeposit;
+
+            // Add The Sediment To The Four Nodes Of The Current Cell Using Bilinear Interpolation
+            // Deposition Is Not Distributed Over A Radius (Like Erosion) So That It Can Fill Small Pits
+            heightmap[dropletIndex] += amountToDeposit * (1 - cellOffsetX) * (1 - cellOffsetY);
+            heightmap[dropletIndex + 1] += amountToDeposit * cellOffsetX * (1 - cellOffsetY);
+            heightmap[dropletIndex + resolution] += amountToDeposit * (1 - cellOffsetX) * cellOffsetY;
+            heightmap[dropletIndex + resolution + 1] += amountToDeposit * cellOffsetX * cellOffsetY;
+        }
+        else
+        {
+            // Erode A Fraction Of The Droplet's Current Carry Capacity.
+            // Clamp The Erosion To The Change In Height So That It Doesn't Dig A Hole In The Terrain Behind The Droplet
+            float amountToErode = min((sedimentCapacity - dropletSediment) * erosionSpeed, -deltaHeight);
+            
+            // Use Erosion Brush To Erode From All Nodes Inside The Droplet's Erosion Radius
+            for (int i = 0; i < erosionBrushIndicesCount; i++)
+            {
+                int erodeIndex = dropletIndex + erosionBrushIndices[i];
+
+                float weightedErodeAmount = amountToErode * erosionBrushWeights[i];
+                float deltaSediment = (heightmap[erodeIndex] < weightedErodeAmount) ? heightmap[erodeIndex] : weightedErodeAmount;
+                heightmap[erodeIndex] -= deltaSediment;
+                dropletSediment += deltaSediment;
+            }
+        }
+
+        // Update Droplet's Speed And Water Content
+        dropletSpeed = sqrt(dropletSpeed * dropletSpeed + deltaHeight * gravity);
+        dropletVolume *= 1 - evaporationSpeed;
+    }
+}

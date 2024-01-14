@@ -1,0 +1,42 @@
+#pragma kernel CSMain
+
+#include "FastNoiseLite.hlsl"
+
+RWStructuredBuffer<float> heightmap;
+RWStructuredBuffer<float> valueMinMax;
+
+int resolution;
+int halfSize;
+float scale;
+
+int noiseType;
+int fractalType;
+
+int seed;
+int octaves;
+
+float lacunarity;
+float gain;
+float frequency;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    fnl_state noise = fnlCreateState(1337);
+    noise.noise_type = noiseType;
+    noise.fractal_type = fractalType;
+    noise.seed = seed;
+    noise.octaves = octaves;
+    noise.lacunarity = lacunarity;
+    noise.gain = gain;
+    noise.frequency = frequency;
+
+    float2 position = float2((id.x * scale) - halfSize, (id.y * scale) - halfSize);
+    
+    int index = id.x + id.y * resolution;
+    float noiseValue = fnlGetNoise2D(noise, position.x, position.y);
+    heightmap[index] = noiseValue;
+    
+    if (noiseValue < valueMinMax[0]) valueMinMax[0] = noiseValue;
+    if (noiseValue > valueMinMax[1]) valueMinMax[1] = noiseValue;
+}

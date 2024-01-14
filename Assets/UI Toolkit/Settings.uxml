@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Foldout text="Noise" name="NoiseData" style="width: 25%; background-color: rgba(50, 50, 50, 0.39); border-left-width: 10px; border-right-width: 10px; border-top-width: 10px; border-bottom-width: 10px; border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; font-size: 20px;">
+        <ui:GroupBox>
+            <ui:EnumField label="Noise Type" type="FastNoiseLite+NoiseType, Assembly-CSharp" name="NoiseType" />
+            <ui:EnumField label="Fractal Type" type="FastNoiseLite+FractalType, Assembly-CSharp" value="FBm" name="FractalType" />
+            <ui:Button text="Random Seed" display-tooltip-when-elided="false" name="RandomSeed" enable-rich-text="false" />
+            <ui:IntegerField label="Seed" value="0" name="Seed" />
+            <ui:SliderInt picking-mode="Ignore" label="Octaves" value="1" high-value="8" low-value="1" show-input-field="true" name="Octaves" />
+            <ui:Slider label="Lacunarity" value="1" high-value="5" show-input-field="true" low-value="1" picking-mode="Ignore" name="Lacunarity" />
+            <ui:Slider picking-mode="Ignore" label="Gain" value="0" high-value="1" show-input-field="true" name="Gain" />
+            <ui:Slider picking-mode="Ignore" label="Frequency" value="0.001" high-value="0.1" show-input-field="true" name="Frequency" low-value="0.001" />
+        </ui:GroupBox>
+    </ui:Foldout>
+    <ui:Foldout text="Terrain" name="TerrainData" style="width: 25%; background-color: rgba(50, 50, 50, 0.39); border-left-width: 10px; border-right-width: 10px; border-top-width: 10px; border-bottom-width: 10px; border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; font-size: 20px;">
+        <ui:GroupBox>
+            <ui:SliderInt picking-mode="Ignore" label="Resolution" value="128" high-value="1024" low-value="128" show-input-field="true" name="Resolution" />
+            <ui:SliderInt picking-mode="Ignore" label="Size" value="1" high-value="256" low-value="1" show-input-field="true" name="Size" />
+            <ui:Slider picking-mode="Ignore" label="Multiplier" value="0" high-value="100" show-input-field="true" name="Multiplier" />
+        </ui:GroupBox>
+    </ui:Foldout>
+    <ui:Foldout text="Erosion" name="ErosionData" style="width: 25%; background-color: rgba(50, 50, 50, 0.39); border-left-width: 10px; border-right-width: 10px; border-top-width: 10px; border-bottom-width: 10px; border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; font-size: 20px;">
+        <ui:GroupBox>
+            <ui:Button text="Erode" display-tooltip-when-elided="false" name="Erode" enable-rich-text="true" />
+            <ui:SliderInt picking-mode="Ignore" label="Iterations" value="1" high-value="100000" low-value="1" show-input-field="true" name="Iterations" />
+            <ui:SliderInt picking-mode="Ignore" label="Iterations&#10;Per Frame" value="1" high-value="10000" low-value="1" show-input-field="true" name="IterationsPerFrame" />
+            <ui:Toggle label="Animate" value="false" name="Animate" />
+        </ui:GroupBox>
+    </ui:Foldout>
+</ui:UXML>

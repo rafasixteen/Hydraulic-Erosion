@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="background-color: rgba(50, 50, 50, 0); border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; left: 80.6%; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; top: 33%; font-size: 20px; align-self: flex-start;">
+        <ui:GroupBox name="Noise" text="Noise">
+            <ui:Label tabindex="-1" text="Generation:" display-tooltip-when-elided="true" name="Generation" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Normalization:" display-tooltip-when-elided="true" name="Normalization" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Texture:" display-tooltip-when-elided="true" name="Texture" style="margin-left: 30px;" />
+        </ui:GroupBox>
+        <ui:GroupBox text="Terrain" name="Terrain">
+            <ui:Label tabindex="-1" text="Vertices:" display-tooltip-when-elided="true" name="TerrainVertices" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Triangles:" display-tooltip-when-elided="true" name="TerrainTriangles" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Normals:" display-tooltip-when-elided="true" name="TerrainNormals" style="margin-left: 30px;" />
+        </ui:GroupBox>
+        <ui:GroupBox text="Terrain Walls" name="TerrainWalls">
+            <ui:Label tabindex="-1" text="Vertices:" display-tooltip-when-elided="true" name="TerrainWallVertices" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Triangles:" display-tooltip-when-elided="true" name="TerrainWallTriangles" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Normals:" display-tooltip-when-elided="true" name="TerrainWallNormals" style="margin-left: 30px;" />
+        </ui:GroupBox>
+        <ui:GroupBox text="Erosion" name="Erosion">
+            <ui:Label tabindex="-1" text="Took:" display-tooltip-when-elided="true" name="Took" style="margin-left: 30px;" />
+            <ui:Label tabindex="-1" text="Avg Per Droplet:" display-tooltip-when-elided="true" name="AvgPerDroplet" style="margin-left: 30px;" />
+        </ui:GroupBox>
+        <ui:GroupBox style="margin-left: 10px;">
+            <ui:Label tabindex="-1" text="FPS:" display-tooltip-when-elided="true" name="Fps" />
+        </ui:GroupBox>
+    </ui:VisualElement>
+</ui:UXML>
