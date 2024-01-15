@@ -2,9 +2,9 @@
 
 ## Overview
 
-This project implements a particle based erosion simulation. 
-The goal is to simulate the process of erosion in a terrain creating visually appealing landscapes. 
-Both the erosion and procedural terrain generation run on the GPU.
+This project implements a particle-based erosion simulation.  
+The goal is to simulate the process of erosion in a terrain, creating visually appealing landscapes.  
+Both the erosion and procedural terrain generation run on the GPU.   
 
 ### Unity Editor Version
 
