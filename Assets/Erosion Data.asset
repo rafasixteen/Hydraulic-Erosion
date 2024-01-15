@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b20e2af3bf7974b4693bc14ca890e913, type: 3}
   m_Name: Erosion Data
   m_EditorClassIdentifier: 
-  Iterations: 0
-  IterationsPerFrame: 0
+  Iterations: 100000
+  IterationsPerFrame: 10000
   Animate: 0
-  ErosionRadius: 0
-  EvaporationSpeed: 0
-  Inertia: 0
-  SedimentCapacityFactor: 0
-  MinimumSedimentCapacity: 0
-  ErosionSpeed: 0
-  DepositionSpeed: 0
+  ErosionRadius: 3
+  EvaporationSpeed: 0.1
+  Inertia: 0.3
+  SedimentCapacityFactor: 3
+  MinimumSedimentCapacity: 0.01
+  ErosionSpeed: 0.3
+  DepositionSpeed: 0.3
